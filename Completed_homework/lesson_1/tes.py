@@ -5,7 +5,7 @@ c = float(input("Если радианы в градусы, напишите '1'
 # Радіани в градуси
 if c == 1:
     c1 = float(input("Введите радианы: "))
-    print (float(round(c1 * 180 / math.pi , 5)))
+    print (float(round(c1 * 180 / math.pi, 5)))
 # Градуси в радіани
 elif c == 2:
     c2 = float(input("Введите градусы: "))
