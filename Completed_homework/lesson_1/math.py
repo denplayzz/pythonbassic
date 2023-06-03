@@ -1,13 +1,13 @@
-    #Програма, що рахує абонплату
+# Програма, що рахує абонплату
 
-    #Попередній місяць
+# Попередній місяць
 ago_month = float(input("Введите данные за прошлый месяц: "))
 
-    #Теперішній місяць
+# Теперішній місяць
 this_month = float(input("Введите данные за это-т месяц: "))
 
-    #Тариф
+# Тариф
 tariff = float(input("Введите свой тариф: "))
-x = (float((this_month - ago_month) * tariff , ))
-print (round(x,2))
+x = (float((this_month - ago_month) * tariff, ))
+print(round(x, 2))
 input()
