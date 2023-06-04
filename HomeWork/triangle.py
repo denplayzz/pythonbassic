@@ -18,7 +18,7 @@ def sides_tringle(a, b, c) -> int:
 
 
 if __name__ == '__main__':
-    #Цикл для помилки
+    # Цикл для помилки
     while True:
         # Цикл для основної програми
         try:
