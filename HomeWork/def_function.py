@@ -19,4 +19,4 @@ if __name__ == '__main__':
             print(f"Ваш чистий прибуток: {net_income}\nПодаток який треба заплатити: {tax_salary}")
             exit()
         except Exception:
-            print("Некоректне введеня. (not INT) введіть число")
+            print("Некоректне введеня. (not int) введіть число")
