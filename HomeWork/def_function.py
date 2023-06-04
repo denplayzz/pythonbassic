@@ -10,7 +10,6 @@ def calculate_tax(tax, salary):
 if __name__ == '__main__':
     # Цикл для помилки
     while True:
-        #
         try:
             # Основний цикл
             salary = float(input("Введіть розмір вашої зарплати: "))
