@@ -1,112 +1,131 @@
-import json
+import csv
 
-def load_notes():
-    try:
-        with open("notes.txt", "r", encoding="utf-8") as file:
-            notes_content = file.readlines()
-            notes_users = {}
-            for line in notes_content:
-                header, note = line.strip().split(":")
-                notes_users[header.strip()] = note.strip()
-            return notes_users
-    except FileNotFoundError:
-        return {}
 
-def menu(notes_users={}):
-    while True:
-        user_question = input(
-            'Вы в программе "Заметки", доступные команды:\nДобавить заметку = add\nУдалить заметку = delete\nСортировать заметки = sort\nПосмотреть заметки = show\nСохранить заметки в файл = save\nИмпортировать имеющиеся заметку в програму = load\nНажмите Enter, чтобы выйти\n> ').lower()
-        try:
-            if user_question == "add":
-                add_notes(notes_users)
-            if user_question == "enumerate":
-                enumerate_notes(notes_users)
-            if user_question == "delete":
-                delete_notes(notes_users)
-            if user_question == "show":
-                show_notes(notes_users)
-            if user_question == "sort":
-                menu_sort(notes_users)
-            if user_question == "save":
-                save_notes(notes_users)
-            if user_question == "load":
-                load_notes(notes_users)
-            if user_question == "":
-                break
-        except Exception:
-            pass
+def read_csv_file(file_name):
+    """Читає CSV-файл та повертає список рядків."""
+    rows = []
+    with open(file_name, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            rows.append(row)
+    return rows
 
-    return notes_users
 
-def add_notes(notes_users):
-    while True:
-        header = input("Введите заголовок заметки\n>")
-        note = input("Введите заметку\n>")
-        notes_users[header] = note
-        x = input("Заметка добавлена!\nХотите добавить ещё заметку? (да/нет): ")
-        if x.lower() != "да":
-            break
+def generate_unique_ids(data):
+    """Генерує унікальні айді для кожного запису та повертає словник з айдішниками та даними."""
+    id_index = {}
+    for row in data:
+        unique_id = hash(tuple(row))  # Генеруємо унікальний ID на основі даних рядка
+        id_index[unique_id] = {
+            'model': row[0],
+            'category': row[1],
+            'brand': row[2],
+            'price': row[3]
+        }
+    return id_index
+
+
+def generate_category_index(data):
+    """Генерує індекс за категоріями та повертає словник з категоріями та списком айдішників."""
+    category_index = {}
+    for row in data:
+        category = row[1]
+        unique_id = hash(tuple(row))
+        if category in category_index:
+            category_index[category].append(unique_id)
         else:
-            continue
+            category_index[category] = [unique_id]
+    return category_index
 
-def save_notes(notes_users):
-    with open("notes.txt", "a", encoding="utf-8") as file:
-        for header, note in notes_users.items():
-            file.write(f"{header}: {note}\n")
-    print("Заметки сохранены в файл.")
 
-def delete_notes(notes_users):
-    show_notes(notes_users)
-    notes_delete = input("Введите номер заметки, чтобы удалить её: ")
-    notes_delete = int(notes_delete)
-    index = 1
-    for key in notes_users.keys():
-        if index == notes_delete:
-            del notes_users[key]
-            print(f"Заметка под номером {notes_delete} удалена")
-            break
-        index += 1
-    else:
-        print("Заметка не найдена")
-
-def menu_sort(notes_users):
-    while True:
-        user_question_sort = input(
-            "Как вы хотите сортировать заметки?\nОт новой до старой = earliest\nОт старой до новой = latest\nОт самой короткой до длинной = shortest\nОт самой длинной до короткой = longest\nНажмите Enter, чтобы выйти из меню сортировки\n> ").lower()
-        if user_question_sort == "earliest":
-            show_notes(notes_users)
-        if user_question_sort == "latest":
-            latest(notes_users)
-        if user_question_sort == "shortest":
-            shortest(notes_users)
-        if user_question_sort == "longest":
-            longest(notes_users)
-        if user_question_sort == "":
-            break
+def generate_brand_index(data):
+    """Генерує індекс за брендами та повертає словник з брендами та списком айдішників."""
+    brand_index = {}
+    for row in data:
+        brand = row[2]
+        unique_id = hash(tuple(row))
+        if brand in brand_index:
+            brand_index[brand].append(unique_id)
         else:
-            pass
+            brand_index[brand] = [unique_id]
+    return brand_index
 
-    return notes_users
 
-def enumerate_notes(notes_users):
-    for index, (key, value) in enumerate(notes_users.items(), start=1):
-        print(f"{index}. {key}: {value}")
+def print_brand_category_stats(data):
+    """Виводить статистику кількості товарів за брендами та категоріями."""
+    brand_stats = {}
+    category_stats = {}
 
-def latest(notes_users):
-    for num, note in sorted(notes_users.items(), reverse=True):
-        print(f"{num}. {note}")
+    for row in data:
+        brand = row[2]
+        category = row[1]
 
-def shortest(notes_users):
-    for num, note in sorted(notes_users.items(), key=lambda x: len(x[1])):
-        print(f'{num}: {note}')
+        if brand in brand_stats:
+            brand_stats[brand] += 1
+        else:
+            brand_stats[brand] = 1
 
-def longest(notes_users):
-    for num, note in sorted(notes_users.items(), key=lambda x: len(x[1]), reverse=True):
-        print(f'{num}: {note}')
+        if category in category_stats:
+            category_stats[category] += 1
+        else:
+            category_stats[category] = 1
 
-def show_notes(notes_users):
-    for index, (key, value) in enumerate(notes_users.items(), start=1):
-        print(f"{index}. {key}: {value}")
+    print("Статистика за брендами:")
+    for brand, count in brand_stats.items():
+        print(f"{brand}: {count} товарів")
+
+    print("\nСтатистика за категоріями:")
+    for category, count in category_stats.items():
+        print(f"{category}: {count} товарів")
+
+
+def print_items_by_brand_and_category(data, brand, category):
+    """Виводить повну інформацію про товари вибраного бренда та категорії."""
+    print(f"Товари бренда '{brand}' у категорії '{category}':")
+    for row in data:
+        if row[2] == brand and row[1] == category:
+            print(f"Модель: {row[0]}, Ціна: {row[3]}")
+
+
+def calculate_brand_distribution(data):
+    """Розраховує розподіл товарів по брендам для кожної категорії."""
+    category_brand_distribution = {}
+
+    for row in data:
+        brand = row[2]
+        category = row[1]
+
+        if category in category_brand_distribution:
+            if brand in category_brand_distribution[category]:
+                category_brand_distribution[category][brand] += 1
+            else:
+                category_brand_distribution[category][brand] = 1
+        else:
+            category_brand_distribution[category] = {brand: 1}
+
+    print("\nРозподіл товарів по брендам для кожної категорії:")
+    for category, distribution in category_brand_distribution.items():
+        print(f"\nКатегорія: {category}")
+        for brand, count in distribution.items():
+            print(f"{brand}: {count} товарів")
+
+
+def main():
+    file_name = 'tech_inventory.csv'
+    rows = read_csv_file(file_name)
+
+    id_index = generate_unique_ids(rows)
+    category_index = generate_category_index(rows)
+    brand_index = generate_brand_index(rows)
+
+    print_brand_category_stats(rows)
+
+    brand = input("Введіть назву бренду: ").title()
+    category = input("Введіть назву категорії: ").title()
+    print_items_by_brand_and_category(rows, brand, category)
+
+    calculate_brand_distribution(rows)
+
 
 if __name__ == '__main__':
-    menu(notes_users=load_notes())
+    main()
